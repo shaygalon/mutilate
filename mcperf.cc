@@ -593,8 +593,8 @@ string name_to_ipaddr(string host, int addport=1) {
 
   char *saveptr = NULL;  // For reentrant strtok().
 
-  char *h_ptr = strtok_r(s_copy, ":", &saveptr);
-  char *p_ptr = strtok_r(NULL, ":", &saveptr);
+  char *h_ptr = strtok_r(s_copy, "@", &saveptr);
+  char *p_ptr = strtok_r(NULL, "@", &saveptr);
 
   char ipaddr[16];
 
@@ -642,7 +642,7 @@ string name_to_ipaddr(string host, int addport=1) {
 
   delete[] s_copy;
   if (addport)
-  	return string(ipaddr) + ":" + string(port);
+	return string(ipaddr) + "@" + string(port);
   else
 	return string(ipaddr);
 }
@@ -733,13 +733,13 @@ int main(int argc, char **argv) {
   vector<string> servers;
   for (unsigned int s = 0; s < args.server_given; s++) {
 	  string sname=args.server_arg[s];
-	  size_t port_pos=sname.find(":");
+	  size_t port_pos=sname.find("@");
 	  if ((port_pos != string::npos) && 
 		  (sname.find("-", port_pos) !=  string::npos)) { //parse range of ports on machine in case more then one instance is running
 		  char *saveptr = NULL;  // For reentrant strtok().
 		  char *cname=strdup(sname.c_str());
 
-		  char *h_ptr = strtok_r(cname, ":", &saveptr);
+		  char *h_ptr = strtok_r(cname, "@", &saveptr);
 		  char *start_port = strtok_r(NULL, "-", &saveptr);
 		  char *end_port = strtok_r(NULL, "-", &saveptr);
 		  
@@ -1116,8 +1116,8 @@ void do_mcperf(const vector<string>& servers, options_t& options,
     char *s_copy = new char[s->length() + 1];
     strcpy(s_copy, s->c_str());
 
-    char *h_ptr = strtok_r(s_copy, ":", &saveptr);
-    char *p_ptr = strtok_r(NULL, ":", &saveptr);
+    char *h_ptr = strtok_r(s_copy, "@", &saveptr);
+    char *p_ptr = strtok_r(NULL, "@", &saveptr);
 
     if (h_ptr == NULL) DIE("strtok(.., \":\") failed to parse %s", s->c_str());
 

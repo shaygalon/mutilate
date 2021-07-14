@@ -1,6 +1,6 @@
 package "mcperf"
 version "0.3"
-usage "mcperf -s server[:port] [options]"
+usage "mcperf -s server[@port] [options]"
 description "\"High-performance\" memcached benchmarking tool"
 
 args "-c cc --show-required -C --default-optional -l"
