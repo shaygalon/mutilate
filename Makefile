@@ -22,7 +22,7 @@ XFLAGS += -static
 endif
 
 mcperf: Makefile $(OBJS)
-	export LD_RUN_PATH=$(LIBPATH) && g++ -o mcperf $(XFLAGS) $(OBJS) $(LIBPATHFLAG) $(LIBS)
+	export LD_RUN_PATH=$(LIBPATH) && $(CXX) -o mcperf $(XFLAGS) $(OBJS) $(LIBPATHFLAG) $(LIBS)
 
 .PHONY: clean apt-get zip cmdline
 
@@ -35,7 +35,7 @@ apt-get:
 	-apt install -y libzmq5 libzmq5-dev
 
 cmdline:
-	gengetopt --input=cmdline.ggo --show-required 	
+	gengetopt --input=cmdline.ggo --show-required
 	gengetopt --input=cmdline.ggo --show-required --show-help > README.help
 	sed -e '/Command/,$$d' README.md > README.base
 	grep "Command" README.md >> README.base
