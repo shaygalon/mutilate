@@ -78,8 +78,8 @@ const char *gengetopt_args_info_help[] = {
   "      --plot_all                Create plot/csv of latency histogram at each\n                                  step when using gnuplot and loghistogram\n                                  sampler",
   "\nAgent-mode options:",
   "  -A, --agentmode               Run client in agent mode.",
-  "  -a, --agent=host              Enlist remote agent.",
-  "  -p, --agent_port=STRING       Agent port.  (default=`5556')",
+  "  -a, --agent=host[@agent_port] Enlist remote agent, with optional agent port\n                                  to support multiple agents per host.",
+  "  -p, --agent_port=STRING       Agent port, ignored when it is part of the\n                                  agent option  (default=`5556')",
   "  -l, --lambda_mul=INT          Lambda multiplier.  Increases share of QPS for\n                                  this client.  (default=`1')",
   "  -C, --measure_connections=INT Master client connections per server, overrides\n                                  --connections.",
   "  -Q, --measure_qps=INT         Explicitly set master client QPS, spread across\n                                  threads and connections.",
@@ -1525,7 +1525,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'a':	/* Enlist remote agent..  */
+        case 'a':	/* Enlist remote agent, with optional agent port to support multiple agents per host..  */
         
           if (update_multiple_arg_temp(&agent_list, 
               &(local_args_info.agent_given), optarg, 0, 0, ARG_STRING,
@@ -1534,7 +1534,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'p':	/* Agent port..  */
+        case 'p':	/* Agent port, ignored when it is part of the agent option.  */
         
         
           if (update_arg( (void *)&(args_info->agent_port_arg), 

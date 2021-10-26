@@ -132,14 +132,14 @@ struct gengetopt_args_info
   const char *keycache_regen_help; /**< @brief When regenerating control number of requests to regenerate. (Default 1%) help description.  */
   const char *plot_all_help; /**< @brief Create plot/csv of latency histogram at each step when using gnuplot and loghistogram sampler help description.  */
   const char *agentmode_help; /**< @brief Run client in agent mode. help description.  */
-  char ** agent_arg;	/**< @brief Enlist remote agent..  */
-  char ** agent_orig;	/**< @brief Enlist remote agent. original value given at command line.  */
-  unsigned int agent_min; /**< @brief Enlist remote agent.'s minimum occurreces */
-  unsigned int agent_max; /**< @brief Enlist remote agent.'s maximum occurreces */
-  const char *agent_help; /**< @brief Enlist remote agent. help description.  */
-  char * agent_port_arg;	/**< @brief Agent port. (default='5556').  */
-  char * agent_port_orig;	/**< @brief Agent port. original value given at command line.  */
-  const char *agent_port_help; /**< @brief Agent port. help description.  */
+  char ** agent_arg;	/**< @brief Enlist remote agent, with optional agent port to support multiple agents per host..  */
+  char ** agent_orig;	/**< @brief Enlist remote agent, with optional agent port to support multiple agents per host. original value given at command line.  */
+  unsigned int agent_min; /**< @brief Enlist remote agent, with optional agent port to support multiple agents per host.'s minimum occurreces */
+  unsigned int agent_max; /**< @brief Enlist remote agent, with optional agent port to support multiple agents per host.'s maximum occurreces */
+  const char *agent_help; /**< @brief Enlist remote agent, with optional agent port to support multiple agents per host. help description.  */
+  char * agent_port_arg;	/**< @brief Agent port, ignored when it is part of the agent option (default='5556').  */
+  char * agent_port_orig;	/**< @brief Agent port, ignored when it is part of the agent option original value given at command line.  */
+  const char *agent_port_help; /**< @brief Agent port, ignored when it is part of the agent option help description.  */
   int lambda_mul_arg;	/**< @brief Lambda multiplier.  Increases share of QPS for this client. (default='1').  */
   char * lambda_mul_orig;	/**< @brief Lambda multiplier.  Increases share of QPS for this client. original value given at command line.  */
   const char *lambda_mul_help; /**< @brief Lambda multiplier.  Increases share of QPS for this client. help description.  */

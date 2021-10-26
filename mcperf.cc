@@ -693,8 +693,30 @@ int main(int argc, char **argv) {
 	  if (s==NULL) {
 		DIE("Could not open socket! %s",zmq_strerror(zmq_errno()));
 	  }
-      string host = string("tcp://") + name_to_ipaddr(args.agent_arg[i],0) +
+
+    // Support multiple agents on the same host.
+    // =========================================
+    // The -a host[@agent_port] option extends the agent
+    // connection string to allow multiple agents running
+    // on the same host with different ports. When agent_port
+    // is part of agent option, the agent_port option is ignored.
+    // It is still desireable to use agent_port option in the agent mode
+    // when starting agent to listen on a specific zmq port.
+
+    string aname=args.agent_arg[i];
+    string host;
+
+    size_t port_pos = aname.find("@");
+
+    if (port_pos != string::npos) {
+      string hstr = aname.substr(0, port_pos);
+      string ip_addr = name_to_ipaddr(hstr, 0);
+      string port = aname.substr(port_pos + 1, aname.length());
+      host = string("tcp://") + ip_addr + string(":") + port;
+    } else {
+      host = string("tcp://") + name_to_ipaddr(args.agent_arg[i],0) +
         string(":") + string(args.agent_port_arg);
+    }
 		D("Add %s as agent\n",host.c_str());
 		// setup socket to handle as many connections as we will need
     int nconns = args.measure_connections_given ? args.measure_connections_arg :

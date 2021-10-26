@@ -77,8 +77,8 @@ option "plot_all" - "Create plot/csv of latency histogram at each step when usin
 	   
 text "\nAgent-mode options:"
 option "agentmode" A "Run client in agent mode."
-option "agent" a "Enlist remote agent." string typestr="host" multiple
-option "agent_port" p "Agent port." string default="5556"
+option "agent" a "Enlist remote agent, with optional agent port to support multiple agents per host." string typestr="host[@agent_port]" multiple
+option "agent_port" p "Agent port, ignored when it is part of the agent option" string default="5556"
 option "lambda_mul" l "Lambda multiplier.  Increases share of \
 QPS for this client." int default="1"
 option "measure_connections" C "Master client connections per server, \
