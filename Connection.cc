@@ -260,14 +260,15 @@ void Connection::issue_set(const char* key, const char* value, int length,
 
   if (options.binary) {
     // each line is 4-bytes
+    uint32_t body_len = keylen + 8 + length;
     binary_header_t h = { 0x80, CMD_SET, htons(keylen),
                           0x08, 0x00, {htons(0)}, //TODO(syang0) get actual vbucket?
-                          htonl(keylen + 8 + length)};
+                          htonl(body_len)};
 
     bufferevent_write(bev, &h, 32); // With extras
     bufferevent_write(bev, key, keylen);
     bufferevent_write(bev, value, length);
-    l = 24 + h.body_len;
+    l = 24 + body_len;
   } else {
     l = evbuffer_add_printf(bufferevent_get_output(bev),
                                 "set %s 0 0 %d\r\n", key, length);
