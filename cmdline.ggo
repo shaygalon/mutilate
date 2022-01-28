@@ -107,6 +107,11 @@ Predefined profiles to approximate some use cases:
 2. memcached for applications backends : p99, 10ms, 32B key , 1000B value, uniform IA,  >1000 connections
 3. memcached for low latency (e.g. stock trading): p99.9, 32B key, 200B value, uniform IA, QPS rate set to 100000	
 4. P99.9, 1 msec. Key size = 32 bytes; value size has uniform distribution from 100 bytes to 1k; 
+5. Update heavy large queue memcached: limit connections and increase depth to 148, update ratio 0.623595
+6. Update heavy high latency memcached: Single connection and increase depth to 249, update ratio 0.558257
+7. Small DB low connection memcached: 1000 records, depth 207, 6 connections per thread
+8. Small DB low connection large queue memcached: 1000 records, depth 250, 7 connections per thread
+9. Small DB low connection large queue with updates memcached: 1000 records, depth 250, 7 connections per thread, update ratio 0.001114
 "
 
 
