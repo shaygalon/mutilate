@@ -1441,19 +1441,31 @@ typedef struct mc_profile_s {
 	char const *ia;
 	int qps;
 	int cc,cr,cg; // key cache parameters
+	int depth;
+	float update_ratio;
 } mc_profile;
 
 static mc_profile mc_profiles[] = {
 //1. memcached for web serving benchmark : p95, 20ms, FB key/value/IA, >4000 connections to the device under test.
-	{4000.,1000000,"95:20000","fb_key","none","fb_value","fb_ia",0,10000,20,1},
+	{4000.,1000000,"95:20000","fb_key","none","fb_value","fb_ia",0,10000,20,1,0,0},
 //2. memcached for applications backends : p99, 10ms, 32B key , 1000B value, uniform IA,  >1000 connections
-	{1000.,1000000,"99:10000","32","none","1000",NULL,0,10000,10,1},
-//3. memcached for low latency (e.g. stock trading): p99.9, 32B key, 200B value, uniform IA, QPS rate set to 100000	
-	{1.,1000000,NULL,"32","none","200",NULL,100000,10000,5,1},
+	{1000.,1000000,"99:10000","32","none","1000",NULL,0,10000,10,1,0,0},
+//3. memcached for low latency (e.g. stock trading): report p99.9, 32B key, 200B value, uniform IA, QPS rate set to 100000	
+	{1.,1000000,NULL,"32","none","200",NULL,100000,10000,5,1,0,0},
 //4. P99.9, 1 msec. Key size = 32 bytes; value size has uniform distribution from 100 bytes to 1k; 
 //	 key request should arrive with zipfian distribution; metric is QPS.
 //	Instead of zipf, use pareto distribution with scale of 16 and shape of 0.154971, 0 offset.
-	{100.,1000000,"999:1000","32","pareto:0.0,16,0.154971","uniform:100,1000",NULL,0,10000,10,1}
+	{100.,1000000,"999:1000","32","pareto:0.0,16,0.154971","uniform:100,1000",NULL,0,10000,10,1,0,0},
+//5. Update heavy large queue memcached
+	{5.,58753,NULL,"114","none","12518",NULL,0,10000,20,1,148,0.623595},
+//6. Update heavy high latency memcached
+	{1.,371510,NULL,"243","none","15578",NULL,0,10000,20,1,249,0.558257},
+//7. Small DB low connection memcached
+	{6.,1000,NULL,"250","none","102720",NULL,0,10000,20,1,207,0},
+//8. Small DB low connection large queue memcached
+	{7.,1000,NULL,"250","none","139851",NULL,0,10000,20,1,250,0},
+//9. Small DB low connection large queue with updates memcached
+	{7.,1000,NULL,"250","none","139851",NULL,0,10000,20,1,250,0.001114},
 };
 #define max_profiles (sizeof(mc_profiles)/sizeof(mc_profile))
 
@@ -1501,6 +1513,12 @@ void parse_profile() {
 	profile_update_dist(&args.keycache_regen_arg,p->cc,&args.keycache_regen_given);
 	if (p->qps > 0) {
 		args.qps_arg = p->qps;
+	}
+	if (p->depth > 0) {
+		args.depth_arg = p->depth;
+	}
+	if (p->update_ratio >= 0) {
+		args.update_arg = p->update_ratio;
 	}
   }
 }
