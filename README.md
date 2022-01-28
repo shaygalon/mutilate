@@ -119,7 +119,7 @@ client-side queuing delay adulterating the latency measurements.
 Command-line Options
 ====================
 
-mcperf 0.3
+mcperf 0.4
 
 Usage: mcperf -s server[@port] [options]
 
