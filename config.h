@@ -22,4 +22,7 @@
 /* Define to 1 if the system has the function `pthread_barrier_init'. */
 #define HAVE_PTHREAD_BARRIER_INIT 1
 
+/* define to use non-blocking recv for poll_recv() */
+#define POLL_RECV_USING_NONBLOCKING
+
 #endif /* CONFIG_H_SEEN */

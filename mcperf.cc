@@ -157,12 +157,28 @@ bool poll_recv(zmq::socket_t& socket, zmq::message_t& msg) {
 	D("- recv"); 
 	//if no timeout, just block
 	if (timer == 0) { 
+#ifdef POLL_RECV_USING_NONBLOCKING
+#ifdef ZMQ_CPP11
+		while (1) {
+			if (socket.recv(msg, recv_noblock_flag).has_value()) {
+				return true;
+			}
+		}
+#else
+		while (1) {
+			if (socket.recv(msg, recv_noblock_flag)) {
+				return true;
+			}
+		}
+#endif
+#else
 #ifdef ZMQ_CPP11
 		auto recv_result = socket.recv(msg);
 		return recv_result.has_value();
 #else
 		return socket.recv(msg);
 #endif
+#endif /* POLL_RECV_USING_NONBLOCKING */
 	}
 	//otherwise, recv non blocking until timeout passed
 	int itid=0;
