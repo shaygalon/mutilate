@@ -100,10 +100,18 @@ void setup_socket_timers() {
 	if (args.poll_max_given)
 		max_poll_time=args.poll_max_arg;
 }
+
+#ifdef ZMQ_CPP11
+const zmq::recv_flags recv_noblock_flag=zmq::recv_flags::dontwait;
+const zmq::send_flags send_noblock_flag=zmq::send_flags::dontwait;
+#else
 #if defined(ZMQ_NOBLOCK)
-int noblock_flag=ZMQ_NOBLOCK;
+const int recv_noblock_flag=ZMQ_NOBLOCK;
+const int send_noblock_flag=ZMQ_NOBLOCK;
 #elif defined(ZMQ_DONTWAIT)
-int noblock_flag=ZMQ_DONTWAIT;
+const int recv_noblock_flag=ZMQ_DONTWAIT;
+const int send_noblock_flag=ZMQ_DONTWAIT;
+#endif
 #endif
 
 void tokenize(const string& str,
@@ -143,13 +151,18 @@ void deTokenize(string& str,
 	 }
 }
 
-bool poll_recv(zmq::socket_t &socket, zmq::message_t *msg) {
+bool poll_recv(zmq::socket_t& socket, zmq::message_t& msg) {
 	unsigned int timer=max_poll_time;
 	bool status=false;
 	D("- recv"); 
 	//if no timeout, just block
 	if (timer == 0) { 
+#ifdef ZMQ_CPP11
+		auto recv_result = socket.recv(msg);
+		return recv_result.has_value();
+#else
 		return socket.recv(msg);
+#endif
 	}
 	//otherwise, recv non blocking until timeout passed
 	int itid=0;
@@ -158,9 +171,15 @@ bool poll_recv(zmq::socket_t &socket, zmq::message_t *msg) {
 	st.tv_nsec=0;
 	do {
 		itid++;
-		status=socket.recv(msg,noblock_flag);
+#ifdef ZMQ_CPP11
+		auto recv_result = socket.recv(msg, recv_noblock_flag);
+		if (recv_result.has_value())
+			return true;
+#else
+		status = socket.recv(msg, recv_noblock_flag);
 		if (status)
 			return status;
+#endif
 		// if failed, check errno for fail reason
 		if (zmq_errno () == EAGAIN) {
 			// if failed just bcs msg non blocking, try again after sleeping for poll interval
@@ -178,20 +197,25 @@ bool poll_recv(zmq::socket_t &socket, zmq::message_t *msg) {
 	return false;
 }
 
-bool poll_send(zmq::socket_t &socket, zmq::message_t &msg) {
+bool poll_send(zmq::socket_t& socket, zmq::message_t& msg) {
 	unsigned int timer=max_poll_time;
 	bool status=false;
 	D("- send"); 
 	//if no timeout, just block
 #if 1
+#ifdef ZMQ_CPP11
+	auto send_result = socket.send(msg, zmq::send_flags::none);
+	return send_result.has_value();
+#else
 	return socket.send(msg);
+#endif
 #else
 	if (timer == 0) { 
 		return socket.send(msg);
 	}
 	//otherwise, recv non blocking until timeout passed
 	do {
-		status=socket.send(msg,noblock_flag);
+		status=socket.send(msg, send_noblock_flag);
 		if (status == 0)
 			return status;
 		// if failed, check errno for fail reason
@@ -212,7 +236,7 @@ bool poll_send(zmq::socket_t &socket, zmq::message_t &msg) {
 static std::string s_recv (zmq::socket_t &socket) {
   zmq::message_t message;
   //socket.recv(&message);
-  bool status=poll_recv(socket,&message);
+  bool status=poll_recv(socket, message);
 
   if (status)
 	return std::string(static_cast<char*>(message.data()), message.size());
@@ -293,12 +317,20 @@ int lid=0;
   while (true) {
     zmq::message_t request;
 
+#ifdef ZMQ_CPP11
+    auto recv_result = socket.recv(request);
+#else
     socket.recv(&request);
+#endif
 lid++;
 
     zmq::message_t num(sizeof(int));
     *((int *) num.data()) = args.threads_arg * args.lambda_mul_arg;
+#ifdef ZMQ_CPP11
+    socket.send(num, zmq::send_flags::none);
+#else
     socket.send(num);
+#endif
 V("sent num %d",lid);
     options_t options;
     memcpy(&options, request.data(), sizeof(options));
@@ -318,7 +350,11 @@ V("sent ack");
 
     options.threads = args.threads_arg;
 
+#ifdef ZMQ_CPP11
+    recv_result = socket.recv(request);
+#else
     socket.recv(&request);
+#endif
     options.lambda_denom = *((int *) request.data());
     s_send(socket, "THANKS");
 V("sent tnx");
@@ -358,7 +394,11 @@ V("Done run.");
     V("req = %s", req.c_str());
     request.rebuild(sizeof(as));
     memcpy(request.data(), &as, sizeof(as));
+#ifdef ZMQ_CPP11
+    socket.send(request, zmq::send_flags::none);
+#else
     socket.send(request);
+#endif
     V("send = %s", req.c_str());
 	if (log_level > DEBUG) {
 		stats.print_header(false);
@@ -394,7 +434,7 @@ V("Agent %d prep ", aid);
 D("Agent %d prep send = %s", aid, status?"true":"false");
 
     zmq::message_t rep;
-    status=poll_recv(*s,&rep);
+    status=poll_recv(*s, rep);
 D("Agent %d prep recv= %s", aid, status?"true":"false");
 	if (!status) { // problem communicating with this agent, don't use it!
 		W("Agent failure detected, skip agent %d!",aid);
@@ -483,7 +523,7 @@ D("Agent %d finish send = %s", aid, status?"true":"false");
     AgentStats as;
     zmq::message_t message;
 
-    status=poll_recv(*s,&message);
+    status=poll_recv(*s, message);
 D("Agent %d finish recv = %s", aid, status?"true":"false");
     memcpy(&as, message.data(), sizeof(as));
     stats.accumulate(as);
