@@ -1565,8 +1565,8 @@ void parse_profile() {
 	profile_update_dist(&args.iadist_arg,p->ia,&args.iadist_given);
 	profile_update_dist(&args.keyorder_arg,p->kg,&args.keyorder_given);
 	profile_update_dist(&args.keycache_capacity_arg,p->cc,&args.keycache_capacity_given);
-	profile_update_dist(&args.keycache_reuse_arg,p->cc,&args.keycache_reuse_given);
-	profile_update_dist(&args.keycache_regen_arg,p->cc,&args.keycache_regen_given);
+	profile_update_dist(&args.keycache_reuse_arg,p->cr,&args.keycache_reuse_given);
+	profile_update_dist(&args.keycache_regen_arg,p->cg,&args.keycache_regen_given);
 	if (p->qps > 0) {
 		args.qps_arg = p->qps;
 	}
