@@ -118,7 +118,7 @@ client-side queuing delay adulterating the latency measurements.
 
 Command-line Options
 ====================
-
+```
 mcperf 0.4
 
 Usage: mcperf -s server[@port] [options]
@@ -223,7 +223,7 @@ Agent-mode options:
   -M, --poll_max=INT            Set timeout for agent protocol recv polling. An
                                   agent not responding within time limit will
                                   be dropped.  (default=`120')
-
+```
 The --measure_* options aid in taking latency measurements of the
 memcached server without incurring significant client-side queuing
 delay.  --measure_connections allows the master to override the
